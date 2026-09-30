@@ -1,0 +1,8 @@
+translation_model: Qwen/Qwen2.5-3B-Instruct
+label_model: Qwen/Qwen2.5-7B-Instruct
+pilot_size: 10
+status_values:
+  - positive
+  - negative
+  - uncertain
+  - not_mentioned

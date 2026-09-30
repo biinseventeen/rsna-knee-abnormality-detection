@@ -1,0 +1,15 @@
+Metadata-Version: 2.4
+Name: rsna-knee-abnormality
+Version: 0.1.0
+Summary: Weakly supervised RSNA knee abnormality detection pipeline
+Requires-Python: >=3.10
+Requires-Dist: numpy>=1.26
+Requires-Dist: pandas>=2.2
+Requires-Dist: pillow>=10.0
+Requires-Dist: pydicom>=3.0
+Requires-Dist: pyyaml>=6.0
+Requires-Dist: tqdm>=4.66
+Requires-Dist: scikit-learn>=1.5
+Requires-Dist: torch>=2.4
+Requires-Dist: torchvision>=0.19
+Requires-Dist: transformers>=4.45

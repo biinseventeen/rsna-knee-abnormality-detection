@@ -1,0 +1,8 @@
+backbone: facebook/dinov2-small
+feature_dim: 384
+image_size: 224
+slices_per_stack: 3
+batch_size: 32
+learning_rate: 0.001
+uncertain_policy: ignore
+not_mentioned_policy: ignore

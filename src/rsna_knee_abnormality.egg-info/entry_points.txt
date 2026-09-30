@@ -1,0 +1,2 @@
+[console_scripts]
+rsna-knee = rsna_knee.cli:main
