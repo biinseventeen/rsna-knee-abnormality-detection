@@ -18,3 +18,5 @@ demo/*.json
 !artifacts/teacher/.gitkeep
 !artifacts/submissions/.gitkeep
 !demo/input/.gitkeep
+
+.checkpoints

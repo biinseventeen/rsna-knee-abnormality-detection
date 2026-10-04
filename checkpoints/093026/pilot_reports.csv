@@ -1,0 +1,269 @@
+StudyInstanceUID,Report_original,Report_en,translation_model,label_model,label_error
+1.2.826.0.1.3680043.8.498.10095687747295410396510538520594649149,"Antecedentes Clínicos:
+Esguince rodilla. [DATE].
+Hallazgos:
+No hay alteraciones de señal significativas de la médula ósea.
+Ligamentos cruzados y colaterales dentro de límites normales.
+Amputación marginal del cuerpo del menisco lateral. Menisco medial de morfología y señal
+conservada, sin signos de rotura.
+Cartílagos de los compartimentos femorotibiales sin alteraciones.
+Fina úlcera condral focal de espesor total del aspecto inferior de la vertiente medial de la tróclea
+femoral con mínimos cambios óseos secundarios. Fenómenos condrales reparativos de la región
+central de la simple femoral. Cartílago rotuliano sin alteraciones.
+Leve derrame articular. No hay quistes poplíteos patológicos.
+Aumento de señal de la inserción distal del tendón cuadricipital y de la inserción proximal del
+tendón rotuliano, sin signos de rotura.
+No hay alteraciones de señal de la grasa de Hoffa.
+Impresión:
+Amputación marginal del cuerpo del menisco lateral.
+Condropatía focal grado 4 del aspecto inferior de la vertiente medial de la tróclea femoral .
+Fenómenos condrales reparativos de la región central de la tróclea femoral.
+Leve derrame articular.
+Leve tendinosis cuadricipital distal y rotuliana proximal.","Antecedents Cliniques:
+Esgouille de genou. [DATE].
+Découverte :
+La moelle épinière n'a pas de changements de signal significatifs.
+Les ligaments croisés et les ligaments parallèles dans des limites normales.
+Amputation marginale du corps du méniscus latéral. Le méniscus médial a une morphologie et un signal conservés, sans signes de rupture.
+Les cartilages des compartiments fémoro-tibiaux sans altérations.
+Une ulcère artérielle focale de profondeur de l'aspect inférieur de la vertèbre médiale de la trochiale fémorale avec des changements osseux secondaires minimes. Des phénomènes réparatifs artériels au niveau central de la simple fémorale. Le cartilage rotulien sans altération.
+Peu de déversement articulaire. Pas de cystes poplitaux pathologiques.
+Signalisation accrue de l'insersection distale du tendon quadriceps et de l'insersection proximale du tendon rotulien, sans signes de rupture.
+Pas de changements de signal de la graisse de Hoffa.
+Impression :
+Amputation marginale du corps du méniscus latéral.
+Dondropatie focale de grade 4 de l'aspect inférieur de la vertèbre médiale de la trochiale fémorale.
+Phénomènes réparatifs artériels au niveau central de la simple fémorale.
+Peu de déversement articulaire.
+Peu de tendinopathie distale du tendon quadriceps et proximale du tendon rotulien.",Qwen/Qwen2.5-3B-Instruct,Qwen/Qwen2.5-7B-Instruct,
+1.2.826.0.1.3680043.8.498.11548045715264151632153040089882701935," In the medial compartment, the meniscus is not torn and there is no focal chondrosis or chondral injury. 
+  
+ The lateral compartment, there is complex tear (main radial and longitudinal vertical component) at the posterior horn of the lateral meniscus. There is no focal chondrosis or chondral injury. 
+  
+ The patellofemoral joint, the patellar and trochlear cartilage appears congruent without chondral lesion. The medial patellofemoral ligament is intact.  
+ In the intercondylar notch, there is interstitial tear of the anterior cruciate ligament, at mid substance. The posterior cruciate ligament is intact. There is no tibial translation. 
+  
+ The medial collateral ligament complexes are intact. The posteromedial oblique ligament is intact.  
+  
+ There is grade II ligamentous sprain (partial tear) of  lateral collateral ligament. Partial tear of the intraarticular portion, popliteus tendon is present. The popliteofibular ligament is intact. The meniscopopliteal fascicles are intact.  
+  
+ The extensor mechanism is normal.  
+  
+ Some amount of right knee effusion with hemarthrosis is present. There is popliteus muscle contusion.  There is no fracture or bone contusion.   Complex tear (main radial and longitudinal vertical component) at the posterior horn of the lateral meniscus. 
+  Interstitial tear of the anterior cruciate ligament, at mid substance.  
+  Grade II ligamentous sprain (partial tear) of  lateral collateral ligament.  
+  Partial tear of the intraarticular portion, popliteus tendon. 
+  Some amount of right knee effusion with hemarthrosis. 
+  Popliteus muscle contusion.","In the medial compartment, the meniscus is not torn and there is no focal chondrosis or chondral injury.
+
+The lateral compartment, there is a complex tear (mainly radial and longitudinal vertical components) at the posterior horn of the lateral meniscus. There is no focal chondrosis or chondral injury.
+
+The patellofemoral joint, the patellar and trochlear cartilage appear congruent without chondral lesions. The medial patellofemoral ligament is intact.
+
+In the intercondylar notch, there is an interstitial tear of the anterior cruciate ligament, at its mid-substance. The posterior cruciate ligament is intact. There is no tibial translation.
+
+The medial collateral ligament complexes are intact. The posteromedial oblique ligament is intact.
+
+There is a grade II ligamentous sprain (partial tear) of the lateral collateral ligament. A partial tear of the intra-articular portion and the popliteus tendon is present. The popliteofibular ligament is intact. The meniscopopliteal fascicles are intact.
+
+The extensor mechanism is normal.
+
+Some amount of right knee effusion with hemarthrosis is present. There is a popliteus muscle contusion. There is no fracture or bone contusion. A complex tear (mainly radial and longitudinal vertical components) at the posterior horn of the lateral meniscus. An interstitial tear of the anterior cruciate ligament, at its mid-substance. A grade II ligamentous sprain (partial tear) of the lateral collateral ligament. A partial tear of the intra-articular portion and the popliteus tendon.",Qwen/Qwen2.5-3B-Instruct,Qwen/Qwen2.5-7B-Instruct,
+1.2.826.0.1.3680043.8.498.48348615349418615469875801439348424274,"Antecedentes Clínicos:
+Esguince del ligamento colateral medial.
+Hallazgos:
+No hay alteraciones de señal significativas de la médula ósea.
+Engrosamiento y aumento de señal con pérdida parcial de la continuidad del tercio medio proximal
+del componente superficial del ligamento colateral medial con edema de las partes blandas
+adyacentes. El resto de los componentes del complejo medial dentro de límites normales.
+El menisco lateral es de morfología y señal conservada, sin signos de rotura. Menisco medial de
+morfología conservada, con aumento de señal del meniscocapsular a su cuerno posterior.
+Cartílagos de los compartimentos femorotibiales y patelofemorales sin alteraciones.
+Leve derrame articular. Pequeño quiste poplíteo, sin signos de complicación.
+Cambios entesopáticos cuadricipitales distales. Tendón rotuliano, tendones de la pata de ganso,
+bíceps femoral y banda iliotibial dentro de límites normales.
+Impresión:
+Signos de un esguince grado II del componente superficial del ligamento colateral medial.
+Signos de aumento de señal meniscocapsular del cuerno posterior del menisco medial que podría
+representar una lesión parcial regional.
+Leve derrame articular. Pequeño quiste poplíteo.
+Cambios entesopáticos cuadricipitales distales","Antecedents Cliniques:
+Elongation du ligament collier médial.
+Fondations :
+Il n'y a pas de changements significatifs de signalisation osseuse.
+Épaississement et augmentation de signal avec perte partielle de la continuité du tiers moyen proximal
+du composant superficiel du ligament collier médial avec oedème des tissus mous adjacents. Le reste des composants du complexe médial dans des limites normales.
+Le meniscus latéral présente une morphologie et un signal conservés, sans signes de rupture. Le meniscus médial présente une morphologie conservée, avec une augmentation de signal du meniscocapsulaire à son cornet postérieur.
+Les cartilages des compartiments fémoro-tibiaux et patello-fémoraux sans altération.
+Peu de déchets articulaires. Petit quête poplité, sans signes de complication.
+Changements entèsopatiques quadriceps distaux.
+Tendons rotulien, tendons de la patte d'oie, biceps fémoral et bande iliotibiale dans des limites normales.
+Impression :
+Signes d'une elongation grade II du composant superficiel du ligament collier médial.
+Signes d'augmentation de signal du meniscocapsulaire du cornet postérieur du meniscus médial qui pourrait représenter une lésion partielle régionale.
+Peu de déchets articulaires. Petit quête poplité.
+Changements entèsopatiques quadriceps distaux.",Qwen/Qwen2.5-3B-Instruct,Qwen/Qwen2.5-7B-Instruct,
+1.2.826.0.1.3680043.8.498.12801308844398614687904447633432197492,"ΤΕΧΝΙΚΗ Η εξέταση έγινε µε ακολουθίες παλµών Τ1, πυκνότητας πρωτονίων µε καταστολή του σήµατος του λίπους και Τ2 βαθµιδωτής ηχούς. ΕΥΡΗΜΑΤΑ - Στο έσω διαµέρισµα παρατηρείται εκφυλιστική ρήξη στο οπίσθιο κέρας και σώµα του µηνίσκου. Επιπλέον παρατηρείται ήπιο οστεοµυελικό οίδηµα και πλήρης εξάλειψη του αρθρικού χόνδρου (ICRS Grade IV) στον έσω κνηµιαίο κόνδυλο, ενώ συνυπάρχουν µικρής έκτασης επιχείλια οστεόφυτα στον µηριαίο και κνηµιαίο κόνδυλο. - Από τον έλεγχο του έξω διαµερίσµατος παρατηρείται ήπιο οστεοµυελικό οίδηµα στον έξω κνηµιαίο κόνδυλο. - Από τον έλεγχο του πρόσθιου διαµερίσµατος δεν σηµειώνονται παθολογικά ευρήµατα. - Φυσιολογικά απεικονίζονται οι πλάγιοι και χιαστοί σύνδεσµοί. - Παρατηρείται µέτρια ποσότητα υγρού ενδαρθρικά που συνέχεται µε ευµεγέθη πολύχωρη συνοβιακή κύστη Baker κεφαλουραίας διαµέτρου 9,7εκ παρά την έσω κεφαλή του γαστροκνηµίου µυός. Συµπέρασµα 1. Εκφυλιστική οστεοαρθρίτιδα και εκφυλισττική ρήξη του µηνίσκου στο έσω διαµέρισµα. 2. Μικροδοκιδώδη κατάγµατα ανεπάρκειας (συνώνυµο SONK) έσω κνηµιαιίου και σε µικρότερη έκταση πρόσθιου έξω κνηµιαίου κονδύλου. ∆εν παρατηρείται καθίζηση της αρθρικής επιφάνειας.","ΤΕΧΝΙΚΗ Η εξέταση έγινε µε ακολουθίες παλµών Τ1, πυκνότητας πρωτονίων µε καταστολή του σήµατος του λίπους και Τ2 βαθµιδωτής ηχούς. ΕΥΡΗΜΑΤΑ - Στο έσω διαµέρισµα παρατηρείται εκφυλιστική ρήξη στο οπίσθιο κέρας και σώµα του µηνίσκου. Επιπλέον παρατηρείται ήπιο οστεοµυελικό οίδηµα και πλήρης εξάλειψη του αρθρικού χόνδρου (ICRS Grade IV) στον έσω κνηµιαίο κόνδυλο, ενώ συνυπάρχουν µικρής έκτασης επιχείλια οστεόφυτα στον µηριαίο και κνηµιαίο κόνδυλο. - Από τον έλεγχο του έξω διαµερίσµατος παρατηρείται ήπιο οστεοµυελικό οίδηµα στον έξω κνηµιαίο κόνδυλο. - Από τον έλεγχο του πρόσθιου διαµερίσµατος δεν σηµειώνονται παθολογικά ευρήµατα. - Φυσιολογικά απεικονίζονται οι πλάγιοι και χιαστοί σύνδεσµοί. - Παρατηρείται µέτρια ποσότητα υγρού ενδαρθρικά που συνέχεται µε ευµεγέθη πολύχωρη συνοβιακή κύστη Baker κεφαλουραίας διαµέτρου 9,7εκ παρά την έσω κεφαλή του γαστροκνηµίου µυός. Συμπέρασµα 1. Εκφυλιστική οστεοαρθρίτιδα και εκφυλισττική ρήξη του µηνίσκου στο έσω διαµέρισµα. 2. Μικροδοκιδώδη κατάγµατα ανεπάρκειας (συνώνυµο SONK) έσω κνηµιαιίου και σε µικρότερη έκταση πρόσθιου έξω κνηµιαίου κονδύλου. ∆εν παρατηρείται καθίζηση της αρθρικής επιφάνειας.",Qwen/Qwen2.5-3B-Instruct,Qwen/Qwen2.5-7B-Instruct,
+1.2.826.0.1.3680043.8.498.67188121544063723837669983597453941774,"SAĞ DİZ MRG. Tetkik protokolü: Çok düzlemli, çok sekanslı. Bulgular: Medial menisküs posterior hornda radial yırtık hattı izlenmiştir.Lateral menisküste grade II dejenerasyon saptanmıştır. PCL hafif elonge görünümdedir, sinyal bütünlüğü korunmuştur. ACL'de parsiyel rüptürü düşündüren devamsızlık, trasesinde sinyal-kalınlık artışı izlenmiştir. Lateral ve medial kollateral ligaman normaldir.Distal kuadriseps ve patellar tendonlar normaldir. Patella normal yerleşimlidir. Retinaküler devamsızlık yoktur.Suprapatellar bursada, diz eklem kapsülünde artmış efüzyon mevcuttur. ","SAĞ DİZ MRG. Tetkik protokulü: Çok düzlemli, çok sekanslı. Bulgular: Medial menisküs posterior hornda radial yırtık hattı izlenmiştir. Lateral menisküste grade II dejenerasyon saptanmıştır. PCL hafif elonge görünümdedir, sinyal bütünlüğü korunmuştur. ACL'de parsiyel rüptürü düşündüren devamsızlık, trasesinde sinyal-kalınlık artışı izlenmiştir. Lateral ve medial kollateral ligaman normaldir. Distal kuadriseps ve patellar tendonlar normaldir. Patella normal yerleşimlidir. Retinaküler devamsızlık yoktur. Suprapatellar bursada, diz eklem kapsülünde artmış efüzyon mevcuttur.",Qwen/Qwen2.5-3B-Instruct,Qwen/Qwen2.5-7B-Instruct,Lateral Meniscus: invalid status 'grade II degeneration'
+1.2.826.0.1.3680043.8.498.82166943552764439138333504456139890254," In the medial compartment, there is complex tear (main radial component) at the body and posterior horn of the medial meniscus. There is displaced meniscal fragment into the medial gutter. There is diffuse high grade and low grade chondrosis (less than and more than 50% thickness cartilage loss) along weightbaring medial femoral condyle and medial tibial plateau. There is no subchondral edema. Osteophytes are present. 
+  
+ The lateral compartment, there is complex tear with buckethandle tear at the anterior horn, body and posterior horn of the lateral meniscus. There is focal high grade chondrosis at the the posterolateral tibial plateau (about 1.5* 1.9 cm). There is subchondral edema. Osteophytes are present.  
+  
+ The patellofemoral joint, there is focal grade  chondrosis (less than 50% thickness cartilage loss) at the medial patellar facet (about 1.3* 1 cm). The medial patellofemoral ligament is intact.  
+  
+ In the intercondylar notch, there is chronic complete tear of the anterior cruciate ligament, at mid substance. The posterior cruciate ligament is intact. There is no tibial translation. 
+  
+ The medial collateral ligament complexes are intact. The posteromedial oblique ligament is intact.  
+  
+ The lateral collateral ligament complexes are intact. The popliteofibular ligament is intact. The meniscopopliteal fascicles are intact.  
+  
+ The extensor mechanism is normal.  
+  
+ Minimal amount of right knee effusion is present.The surrounding musculature is normal.  Mild medial tibiofemoral compartmental osteoarthritis of the right knee by evidence of chondrosis, subchondral edema and osteophytes. 
+  Focal high grade chondrosis at the the posterolateral tibial plateau (about 1.5* 1.9 cm).  
+  Focal low grade  chondrosis at the medial patellar facet (about 1.3* 1 cm).  
+  Complex tear (main radial component) at the body and posterior horn of the medial meniscus. (note: displaced meniscal fragment into the medial gutter). 
+  Complex tear with buckethandle tear at the anterior horn, body and posterior horn of the lateral meniscus. 
+  Chronic complete tear of the anterior cruciate ligament, at mid substance.  
+  Minimal amount of right knee effusion.","In the medial compartment, there is a complex tear (main radial component) at the body and posterior horn of the medial meniscus. There is a displaced meniscal fragment in the medial gutter. There is diffuse high-grade and low-grade chondrosis (less than and more than 50% thickness cartilage loss) along the weight-bearing medial femoral condyle and medial tibial plateau. There is no subchondral edema. Osteophytes are present.
+
+The lateral compartment has a complex tear with a bucket-handle tear at the anterior horn, body, and posterior horn of the lateral meniscus. There is focal high-grade chondrosis at the posterolateral tibial plateau (approximately 1.5 x 1.9 cm). There is subchondral edema. Osteophytes are present.
+
+The patellofemoral joint shows focal grade chondrosis (less than 50% thickness cartilage loss) at the medial patellar facet (approximately 1.3 x 1 cm). The medial patellofemoral ligament is intact.
+
+In the intercondylar notch, there is a chronic complete tear of the anterior cruciate ligament, at the mid-substance. The posterior cruciate ligament is intact. There is no tibial translation.
+
+The medial collateral ligament complexes are intact. The posteromedial oblique ligament is intact.
+
+The lateral collateral ligament complexes are intact. The popliteofibular ligament is intact. The meniscopopliteal fascicles are intact.
+
+The extensor mechanism is normal.
+
+Minimal amount of right knee effusion is present. The surrounding musculature is normal. Mild medial tibiofemoral compartmental osteoarthritis of the right knee is evidenced by chondrosis, subchondral edema, and osteophytes. Focal high-grade chondrosis is noted at the posterolateral tibial plateau (approximately 1.5 x 1.9 cm). Focal low-grade chondrosis is noted at the medial patellar facet (approximately 1.3 x 1 cm). A complex tear (main radial component) is present at the body and posterior horn of the medial meniscus. (Note: displaced meniscal fragment in the medial gutter). A complex tear with a bucket-handle tear is present at the anterior horn, body, and posterior horn of the lateral meniscus. A chronic complete tear of the anterior cruciate ligament, at the mid-substance is present.",Qwen/Qwen2.5-3B-Instruct,Qwen/Qwen2.5-7B-Instruct,
+1.2.826.0.1.3680043.8.498.56512564464301544960446419143135447363,Technique: MRI of the knee. ACL normal. MCL normal. Medial meniscus mucoid degeneration. Lateral meniscus normal. OA of medial compartment. No baker's cyst. Effusion with synovitis. Conclusion: OA of medial compartment. Effusion with synovitis.,Technique: MRI of the knee. ACL normal. MCL normal. Medial meniscus mucoid degeneration. Lateral meniscus normal. OA of medial compartment. No baker's cyst. Effusion with synovitis. Conclusion: OA of medial compartment. Effusion with synovitis.,Qwen/Qwen2.5-3B-Instruct,Qwen/Qwen2.5-7B-Instruct,
+1.2.826.0.1.3680043.8.498.28925345859498351203477642741908452608,"SAĞ DİZ MRG. Tetkik protokolü: Çok düzlemli, çok sekanslı. Bulgular: Lateral menisküs normal. Medial menisküs ekstrüde görünümde olup posterior hornunda yırtık ile uyumlu sinyal değişiklikleri mevcuttur. Arka çapraz bağ, çm çapraz bağ , lateral ve medial kollateral ligaman normaldir.Medial kollateral ligaman çevresinde sıvı artışı izlenmiştir. Distal kuadriseps ve patellar tendonlar normaldir. Patella normal yerleşimlidir. Retinaküler devamsızlık yoktur.Suprapatellar bursada sıvı artışı izlenmiştir. Tibia proksimali ve femur distal epikondil seviyesi medialde kemik iliği ödemi ile uyumlu görünümler mevcuttur. Bu düzeyde eklem aralığı belirgin daralmıştır.Popliteal fossada 54x15 mm çapta Baker kisti ile uyumlu görünüm mevcuttur. ","SAĞ DİZ MRG. Tetkik protokulü: Çok düzlemli, çok sekanslı. Bulgular: Lateral menisküs normal. Medial menisküs ekstrüde görünümde olup posterior hornunda yırtık ile uyumlu sinyal değişiklikleri mevcuttur. Arka çapraz bağ, çm çapraz bağ , lateral ve medial kollateral ligaman normaldir. Medial kollateral ligaman çevresinde sıvı artışı izlenmiştir. Distal kuadriseps ve patellar tendonlar normaldir dişili patella normal yerleşimlidir. Retinaküler devamsızlık yoktur. Suprapatellar bursada sıvı artışı izlenmiştir. Tibia proksimali ve femur distal epikondil seviyesi medialde kemik iliği ödemi ile uyumlu görünümler mevcuttur. Bu düzeyde eklem aralığı belirgin daralmıştır. Popliteal fossada 54x15 mm çapda Baker kisti ile uyumlu görünüm mevcuttur.",Qwen/Qwen2.5-3B-Instruct,Qwen/Qwen2.5-7B-Instruct,
+1.2.826.0.1.3680043.8.498.72853333220043794904856138561095171921,"Exam Type: MRI KNEE LEFT WO CONTRAST
+Exam Date and Time: [DATE] [TIME]
+Indication: Left knee pain for 4 weeks after injury at gym.
+Comparison: No relevant prior studies available for comparison.
+
+TECHNIQUE:
+MRI of the left knee was performed on a 1.5 Tesla system with a dedicated knee coil in three planes (axial, sagittal, and coronal), using a standard non-contrast protocol.
+
+FINDINGS:
+OSSEOUS STRUCTURES:
+Alignment is anatomic. No acute fracture. Normal background marrow signal. No focal osseous lesion. Focal bone marrow edema at the anteromedial tibial plateau. Small focal osteochondral impaction injury at the posterior lateral femoral condyle.
+
+JOINT SPACE:
+No joint effusion. No Baker's cyst.
+
+MEDIAL COMPARTMENT:
+Medial meniscus: No tear.
+Medial compartment cartilage: Intact.
+
+LATERAL COMPARTMENT:
+Lateral meniscus: No tear.
+Lateral compartment cartilage: Intact.
+
+PATELLOFEMORAL COMPARTMENT:
+Patellofemoral compartment cartilage: Low-grade articular cartilage loss at the lateral and medial patellar facets.
+
+CRUCIATE LIGAMENTS:
+Anterior cruciate ligament (ACL): No tear.
+Posterior cruciate ligament (PCL): No tear.
+
+COLLATERAL LIGAMENTS & POSTEROLATERAL CORNER:
+Medial collateral ligament (MCL): Grade 2 injury.
+Lateral collateral ligament (LCL) complex: Normal.
+Posterolateral corner structures: Normal.
+
+EXTENSOR MECHANISM:
+Extensor Apparatus: Normal quadriceps tendon. Normal patellar tendon.
+Medial patellofemoral ligament (MPFL) and patellar retinacula: Normal.
+Patellofemoral tracking: No edema in superolateral Hoffa's fat pad. No lateral patellar tilt or translation. No patella alta. Tibial tubercle-trochlear groove (TT-TG) distance is 12 mm, normal.
+
+MUSCLES/TENDONS:
+No disproportionate muscle atrophy. Visualized tendons not previously discussed are intact.
+
+SOFT TISSUES:
+No soft tissue mass. Normal popliteal neurovascular bundle.
+
+IMPRESSION:
+
+1.	Small acute osteochondral impaction injury at the posterior lateral femoral condyle. Small focus of bone marrow edema at the anteromedial tibial plateau, likely a contusion.
+2.	Grade 2 medial collateral ligament (MCL) sprain.
+3.	Mild patellofemoral compartment chondrosis.","Exam Type: MRI KNEE LEFT WO CONTRAST
+Exam Date and Time: [DATE] [TIME]
+Indication: Left knee pain for 4 weeks after injury at gym.
+Comparison: No relevant prior studies available for comparison.
+
+TECHNIQUE:
+MRI of the left knee was performed on a 1.5 Tesla system with a dedicated knee coil in three planes (axial, sagittal, and coronal), using a standard non-contrast protocol.
+
+FINDINGS:
+OSSEOUS STRUCTURES:
+Alignment is anatomic. No acute fracture. Normal background marrow signal. No focal osseous lesion. Focal bone marrow edema at the anteromedial tibial plateau. Small focal osteochondral impaction injury at the posterior lateral femoral condyle.
+
+JOINT SPACE:
+No joint effusion. No Baker's cyst.
+
+MEDIAL COMPARTMENT:
+Medial meniscus: No tear.
+Medial compartment cartilage: Intact.
+
+LATERAL COMPARTMENT:
+Lateral meniscus: No tear.
+Lateral compartment cartilage: Intact.
+
+PATELLOFEMORAL COMPARTMENT:
+Patellofemoral compartment cartilage: Low-grade articular cartilage loss at the lateral and medial patellar facets.
+
+CRUCIATE LIGAMENTS:
+Anterior cruciate ligament (ACL): No tear.
+Posterior cruciate ligament (PCL): No tear.
+
+COLLATERAL LIGAMENTS & POSTEROLATERAL CORNER:
+Medial collateral ligament (MCL): Grade 2 injury.
+Lateral collateral ligament (LCL) complex: Normal.
+Posterolateral corner structures: Normal.
+
+EXTENSOR MECHANISM:
+Extensor Apparatus: Normal quadriceps tendon. Normal patellar tendon.
+Medial patellofemoral ligament (MPFL) and patellar retinacula: Normal.
+Patellofemoral tracking: No edema in superolateral Hoffa's fat pad. No lateral patellar tilt or translation. No patella alta. Tibial tubercle-trochlear groove (TT-TG) distance is 12 mm, normal.
+
+MUSCLES/TENDONS:
+No disproportionate muscle atrophy. Visualized tendons not previously discussed are intact.
+
+SOFT TISSUES:
+No soft tissue mass. Normal popliteal neurovascular bundle.
+
+IMPRESSION:
+
+1. Small acute osteochondral impaction injury at the posterior lateral femoral condyle. Small focus of bone marrow edema at the anteromedial tibial plateau, likely a contusion.
+2. Grade 2 medial collateral ligament (MCL) sprain.
+3. Mild patellofemoral compartment chondrosis.",Qwen/Qwen2.5-3B-Instruct,Qwen/Qwen2.5-7B-Instruct,
+1.2.826.0.1.3680043.8.498.12606657226568558340797193167488111973,"In the medial compartment, the meniscus is not torn and there is no focal chondrosis or chondral injury. 
+ The lateral compartment, there is longitudinal vertical oblique tear at the posterior horn of the lateral meniscus. There is no focal chondrosis or chondral injury. 
+ The patellofemoral joint, the patellar and trochlear cartilage appears congruent without chondral lesion. The medial patellofemoral ligament is intact.  
+ In the intercondylar notch, there is complete tear of the anterior cruciate ligament, at mid substance. The posterior cruciate ligament is intact.  
+ There is grade II ligamentous sprain (partial tear) of the medial collateral ligament. The posteromedial oblique ligament is intact. The lateral collateral ligament complexes are intact. The extensor mechanism is normal.  
+ No knee effusion is present. The surrounding musculature is normal. There is no fracture or bone contusion. - Longitudinal vertical oblique tear at the posterior horn of the lateral meniscus. 
+ - Complete tear of the anterior cruciate ligament, at mid substance. 
+ - Grade II ligamentous sprain (partial tear) of the medial collateral ligament.","In the medial compartment, the meniscus is not torn and there is no focal chondrosis or chondral injury. 
+
+The lateral compartment, there is a longitudinal vertical oblique tear at the posterior horn of the lateral meniscus. There is no focal chondrosis or chondral injury. 
+
+The patellofemoral joint, the patellar and trochlear cartilage appears congruent without chondral lesion. The medial patellofemoral ligament is intact. 
+
+In the intercondylar notch, there is a complete tear of the anterior cruciate ligament, at mid substance. The posterior cruciate ligament is intact. 
+
+There is a grade II ligamentous sprain (partial tear) of the medial collateral ligament. The posteromedial oblique ligament is intact. The lateral collateral ligament complexes are intact. The extensor mechanism is normal. 
+
+No knee effusion is present. The surrounding musculature is normal. There is no fracture or bone contusion. 
+
+- Longitudinal vertical oblique tear at the posterior horn of the lateral meniscus. 
+
+- Complete tear of the anterior cruciate ligament, at mid substance. 
+
+- Grade II ligamentous sprain (partial tear) of the medial collateral ligament.",Qwen/Qwen2.5-3B-Instruct,Qwen/Qwen2.5-7B-Instruct,

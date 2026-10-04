@@ -1,0 +1,13 @@
+target,n_gold,n_evaluated,coverage,correct,accuracy
+ACL,48,45,0.9375,38,0.8444
+MCL,48,45,0.9375,37,0.8222
+Medial Meniscus,48,46,0.9583,40,0.8696
+Lateral Meniscus,48,42,0.875,38,0.9048
+Medial OA,48,32,0.6667,29,0.9062
+Lateral OA,48,37,0.7708,28,0.7568
+PF OA,48,32,0.6667,26,0.8125
+Effusion,48,40,0.8333,28,0.7
+Synovitis,48,23,0.4792,15,0.6522
+Baker's,48,38,0.7917,33,0.8684
+Contusion,48,17,0.3542,15,0.8824
+Fracture,48,31,0.6458,25,0.8065
