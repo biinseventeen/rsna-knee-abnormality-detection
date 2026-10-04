@@ -19,4 +19,4 @@ demo/*.json
 !artifacts/submissions/.gitkeep
 !demo/input/.gitkeep
 
-.checkpoints
+.checkpoints/
