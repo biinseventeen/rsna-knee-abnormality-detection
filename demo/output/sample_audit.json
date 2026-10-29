@@ -1,0 +1,90 @@
+{
+  "status": "ok",
+  "study_instance_uid": "1.2.826.0.1.3680043.8.498.10095687747295410396510538520594649149",
+  "sample_root": "C:\\rsna_demo\\demo_sample",
+  "series_count": 5,
+  "dicom_file_count": 164,
+  "dino_roles_selected": 5,
+  "vit_planes_selected": 3,
+  "series": [
+    {
+      "SeriesInstanceUID": "1.2.826.0.1.3680043.8.498.10791858932231443712736629517371931282",
+      "plane": "Sagittal",
+      "fluid_sensitive": 0,
+      "fat_suppression": 0,
+      "n_files": 36,
+      "valid_headers": 36,
+      "sort_mode": "ImagePositionPatient_projected",
+      "selected_for": "DINOv2:SAG_NONFLUID",
+      "pixel_decode": "ok",
+      "pixel_shape": [
+        400,
+        400
+      ]
+    },
+    {
+      "SeriesInstanceUID": "1.2.826.0.1.3680043.8.498.12451507871565834868863189854063726441",
+      "plane": "Coronal",
+      "fluid_sensitive": 0,
+      "fat_suppression": 0,
+      "n_files": 30,
+      "valid_headers": 30,
+      "sort_mode": "ImagePositionPatient_projected",
+      "selected_for": "DINOv2:COR_NONFLUID",
+      "pixel_decode": "ok",
+      "pixel_shape": [
+        384,
+        384
+      ]
+    },
+    {
+      "SeriesInstanceUID": "1.2.826.0.1.3680043.8.498.21497837050858589852101556928971904198",
+      "plane": "Coronal",
+      "fluid_sensitive": 1,
+      "fat_suppression": 1,
+      "n_files": 30,
+      "valid_headers": 30,
+      "sort_mode": "ImagePositionPatient_projected",
+      "selected_for": "DINOv2:COR_FLUID;ViT-B/16:Coronal",
+      "pixel_decode": "ok",
+      "pixel_shape": [
+        320,
+        320
+      ]
+    },
+    {
+      "SeriesInstanceUID": "1.2.826.0.1.3680043.8.498.37372672584387115708078590109474719429",
+      "plane": "Sagittal",
+      "fluid_sensitive": 1,
+      "fat_suppression": 1,
+      "n_files": 36,
+      "valid_headers": 36,
+      "sort_mode": "ImagePositionPatient_projected",
+      "selected_for": "DINOv2:SAG_FLUID;ViT-B/16:Sagittal",
+      "pixel_decode": "ok",
+      "pixel_shape": [
+        320,
+        320
+      ]
+    },
+    {
+      "SeriesInstanceUID": "1.2.826.0.1.3680043.8.498.67495435033389756963800730529101229430",
+      "plane": "Axial",
+      "fluid_sensitive": 1,
+      "fat_suppression": 1,
+      "n_files": 32,
+      "valid_headers": 32,
+      "sort_mode": "ImagePositionPatient_projected",
+      "selected_for": "DINOv2:AX_FLUID;ViT-B/16:Axial",
+      "pixel_decode": "ok",
+      "pixel_shape": [
+        320,
+        320
+      ]
+    }
+  ],
+  "issues": [],
+  "error_count": 0,
+  "warning_count": 0,
+  "pixel_decode_checked": true
+}
