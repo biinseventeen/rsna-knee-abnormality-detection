@@ -1,0 +1,6 @@
+# Optional dashboard dependencies. The base project requirements remain unchanged.
+numpy>=1.26
+pandas>=2.2
+pydicom>=3.0
+plotly>=5.24
+streamlit>=1.40
