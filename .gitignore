@@ -10,6 +10,7 @@ artifacts/checkpoints/*
 artifacts/features/*
 artifacts/teacher/*
 artifacts/submissions/*
+artifacts/_extracted_final_dinov2_bundle/*
 demo/input/*
 demo/*.json
 
@@ -19,4 +20,9 @@ demo/*.json
 !artifacts/submissions/.gitkeep
 !demo/input/.gitkeep
 
+
 .checkpoints/
+
+demo/output/*
+
+rsna-demo-source.zip
