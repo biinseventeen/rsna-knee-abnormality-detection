@@ -1,6 +1,7 @@
-# Optional dashboard dependencies. The base project requirements remain unchanged.
+# Optional dashboard dependencies; the base project requirements stay unchanged.
 numpy>=1.26
 pandas>=2.2
 pydicom>=3.0
-plotly>=5.24
+Pillow>=10.0
 streamlit>=1.40
+plotly

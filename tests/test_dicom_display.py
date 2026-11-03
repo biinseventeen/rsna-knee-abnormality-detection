@@ -6,7 +6,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from rsna_knee.ui.dicom_display import to_display_uint8  # noqa: E402
+from rsna_knee.ui.dicom_display import make_thumbnail, to_display_uint8  # noqa: E402
 
 
 def test_grayscale_display_is_uint8_and_full_range():
@@ -36,3 +36,9 @@ def test_constant_image_does_not_divide_by_zero():
     result = to_display_uint8(np.ones((4, 4), dtype=np.float32))
     assert result.shape == (4, 4)
     assert np.isfinite(result).all()
+
+
+def test_thumbnail_preserves_aspect_ratio_and_bounds_size():
+    image = np.zeros((1000, 500), dtype=np.uint8)
+    thumb = make_thumbnail(image, max_side=250)
+    assert thumb.shape == (250, 125)

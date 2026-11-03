@@ -1,20 +1,17 @@
-"""Streamlit dashboard for viewing one local RSNA knee demo study.
+"""Layperson-oriented Streamlit UI for one RSNA knee MRI study.
 
-The app is deliberately read-only with respect to model inference: it reads the
-Phase 3 ensemble outputs and displays the exported DICOM series. It never loads
-model checkpoints or runs DINOv2/ViT forward passes.
+The dashboard reads the Phase 3 ensemble output and local DICOM sample only.
+It never loads model checkpoints or runs DINOv2/ViT inference.
 """
 
 from __future__ import annotations
 
-import json
 import os
 import sys
 from pathlib import Path
 from typing import Any
 
 import numpy as np
-import pandas as pd
 import plotly.express as px
 import streamlit as st
 
@@ -42,22 +39,108 @@ from rsna_knee.ui.dashboard_data import (  # noqa: E402
     TARGETS,
     load_prediction_bundle,
 )
-from rsna_knee.ui.dicom_display import read_dicom_preview  # noqa: E402
-
+from rsna_knee.ui.dicom_display import read_dicom_thumbnail  # noqa: E402
+from rsna_knee.ui.study_context import (  # noqa: E402
+    PatientInfo,
+    StudyContextError,
+    load_radiology_report,
+    read_patient_info,
+)
 
 st.set_page_config(
-    page_title="RSNA Knee MRI — Local Demo",
+    page_title="RSNA Knee MRI — Demo",
     page_icon="🦴",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
 
-STATUS_LABELS = {
-    "weighted_ensemble": "Weighted ensemble (DINOv2 90% + ViT 10%)",
-    "dinov2_only": "DINOv2-only fallback",
-    "vit_only": "ViT-only fallback",
-    "neutral_fallback_0.5": "Neutral fallback (0.5)",
+PLANE_INFO = (
+    (
+        "sagittal",
+        "Mặt phẳng dọc (Sagittal)",
+        "Ảnh nhìn dọc theo đầu gối, giúp quan sát cấu trúc phía trước và phía sau.",
+    ),
+    (
+        "coronal",
+        "Mặt phẳng trán (Coronal)",
+        "Ảnh nhìn từ phía trước, giúp quan sát phần trong và phần ngoài của khớp gối.",
+    ),
+    (
+        "axial",
+        "Mặt phẳng ngang (Axial)",
+        "Ảnh cắt ngang qua khớp gối.",
+    ),
+)
+
+TARGET_DISPLAY: dict[str, tuple[str, str, str]] = {
+    "ACL": (
+        "Tổn thương dây chằng chéo trước",
+        "Dây chằng quan trọng giúp giữ vững khớp gối khi xoay và đổi hướng.",
+        "Dây chằng",
+    ),
+    "MCL": (
+        "Tổn thương dây chằng bên trong",
+        "Dây chằng nằm ở phía trong đầu gối, giúp chống lực làm gối lệch vào trong.",
+        "Dây chằng",
+    ),
+    "Medial Meniscus": (
+        "Tổn thương sụn chêm trong",
+        "Sụn đệm hình bán nguyệt ở phía trong khớp gối.",
+        "Sụn chêm",
+    ),
+    "Lateral Meniscus": (
+        "Tổn thương sụn chêm ngoài",
+        "Sụn đệm hình bán nguyệt ở phía ngoài khớp gối.",
+        "Sụn chêm",
+    ),
+    "Medial OA": (
+        "Thoái hóa khoang khớp trong",
+        "Dấu hiệu hao mòn ở phần khớp nằm phía trong đầu gối.",
+        "Thoái hóa khớp",
+    ),
+    "Lateral OA": (
+        "Thoái hóa khoang khớp ngoài",
+        "Dấu hiệu hao mòn ở phần khớp nằm phía ngoài đầu gối.",
+        "Thoái hóa khớp",
+    ),
+    "PF OA": (
+        "Thoái hóa khớp bánh chè – xương đùi",
+        "Dấu hiệu hao mòn tại mặt khớp giữa xương bánh chè và xương đùi.",
+        "Thoái hóa khớp",
+    ),
+    "Effusion": (
+        "Tràn dịch khớp gối",
+        "Lượng dịch trong khớp tăng nhiều hơn bình thường.",
+        "Dấu hiệu khác",
+    ),
+    "Synovitis": (
+        "Viêm màng hoạt dịch",
+        "Tình trạng viêm của lớp mô lót bên trong bao khớp.",
+        "Dấu hiệu khác",
+    ),
+    "Baker's": (
+        "Nang Baker",
+        "Túi dịch thường hình thành ở vùng phía sau khớp gối.",
+        "Dấu hiệu khác",
+    ),
+    "Contusion": (
+        "Dập xương (bone bruise)",
+        "Tổn thương bên trong xương do va đập, không nhất thiết đồng nghĩa với gãy xương.",
+        "Dấu hiệu khác",
+    ),
+    "Fracture": (
+        "Gãy xương",
+        "Tổn thương làm mất tính liên tục của xương.",
+        "Dấu hiệu khác",
+    ),
+}
+
+BLEND_LABELS = {
+    "weighted_ensemble": "Đã kết hợp hai mô hình",
+    "dinov2_only": "Chỉ sử dụng mô hình DINOv2",
+    "vit_only": "Chỉ sử dụng mô hình ViT-B/16",
+    "neutral_fallback_0.5": "Không có mô hình hợp lệ — dùng giá trị trung tính",
 }
 
 
@@ -65,8 +148,6 @@ def _sample_default() -> str:
     configured = os.environ.get("RSNA_DEMO_SAMPLE", "").strip()
     if configured and Path(configured).exists():
         return configured
-    # Prefer the short path used during the Phase 1 DICOM audit. Deeply nested
-    # Study/Series/SOP UID folders can push a file path over Windows MAX_PATH.
     candidates = [
         Path(r"C:\rsna_demo\demo_sample"),
         PROJECT_ROOT / "demo" / "input" / "demo_sample",
@@ -74,312 +155,316 @@ def _sample_default() -> str:
     for candidate in candidates:
         if candidate.is_dir():
             return str(candidate)
-    return str(candidates[0])
+    return str(candidates[-1])
 
 
-@st.cache_resource(show_spinner="Đang đọc metadata DICOM của study...")
+def _report_default(sample_path: str) -> str:
+    root = Path(sample_path).expanduser()
+    for name in ("radiology_report.txt", "radiology_report.md", "doctor_report.txt", "doctor_report.md"):
+        candidate = root / name
+        if candidate.is_file():
+            return str(candidate)
+    return ""
+
+
+@st.cache_resource(show_spinner="Đang đọc thông tin study và thứ tự lát MRI...")
 def _load_study(sample_path: str):
-    # Import the Phase 1 reader lazily so the prediction dashboard can still
-    # open if the optional DICOM dependencies are unavailable.
     from rsna_knee.dicom.sample import load_demo_sample
 
     return load_demo_sample(sample_path)
 
 
-@st.cache_data(show_spinner=False)
-def _load_preview(path_text: str, modified_ns: int) -> np.ndarray:
-    # modified_ns participates in the cache key so an updated file is re-read.
+@st.cache_data(show_spinner=False, max_entries=96)
+def _load_thumbnail(path_text: str, modified_ns: int, max_side: int = 320) -> np.ndarray:
+    # mtime participates in the cache key so replaced DICOM files are re-read.
     del modified_ns
-    return read_dicom_preview(path_text)
+    return read_dicom_thumbnail(path_text, max_side=max_side)
 
 
-def _model_status_text(report: dict[str, Any], key: str) -> str:
-    model = report.get("models", {}).get(key, {})
-    valid = model.get("valid") is True
-    status = str(model.get("status", "unknown"))
-    return f"Hợp lệ · {status}" if valid else f"Không dùng trong blend · {status}"
+def _plane_key(value: Any) -> str:
+    text = str(value or "").strip().casefold()
+    if "sag" in text:
+        return "sagittal"
+    if "cor" in text:
+        return "coronal"
+    if "axi" in text or "trans" in text:
+        return "axial"
+    return "unknown"
 
 
-def _format_percent(value: float) -> str:
-    return f"{value * 100:.1f}%"
+def _render_patient_info(info: PatientInfo) -> None:
+    st.subheader("Thông tin người bệnh")
+    cols = st.columns(5)
+    fields = (
+        ("Tuổi", info.age),
+        ("Giới tính", info.sex),
+        ("Bên gối", info.knee_side),
+        ("Ngày chụp", info.study_date),
+        ("Vùng chụp", info.body_part),
+    )
+    for col, (label, value) in zip(cols, fields):
+        with col:
+            st.metric(label, value)
+    st.caption(
+        f"Phương thức chụp: {info.modality}. Thông tin được đọc từ metadata DICOM; "
+        "dashboard không hiển thị tên hoặc mã định danh cá nhân. Trường nào không có trong dữ liệu sẽ được ghi rõ."
+    )
 
 
-def _render_prediction_section(bundle: PredictionBundle) -> None:
-    report = bundle.report
-    blend_status = str(report.get("blend_status", ""))
-    models = report.get("models", {})
-    dino_valid = bool(models.get("dinov2", {}).get("valid", False))
-    vit_valid = bool(models.get("vit_b16", {}).get("valid", False))
+def _collect_plane_images(study: Any, plane: str) -> tuple[list[dict[str, Any]], int]:
+    series_rows = []
+    for series in study.series.values():
+        if _plane_key(series.metadata.get("Anatomical_Plane", "")) == plane:
+            series_rows.append(series)
+    series_rows.sort(key=lambda item: item.series_uid)
 
-    st.subheader("Tổng quan dự đoán")
-    m1, m2, m3, m4 = st.columns(4)
-    m1.metric("StudyInstanceUID", f"…{bundle.study_uid[-12:]}")
-    m2.metric("DINOv2", "Valid" if dino_valid else "Fallback / unusable")
-    m3.metric("ViT-B/16", "Valid" if vit_valid else "Fallback / unusable")
-    m4.metric("Blend status", blend_status.replace("_", " "))
+    tiles: list[dict[str, Any]] = []
+    for series_number, series in enumerate(series_rows, start=1):
+        readable = [item for item in series.files if not item.header_error]
+        for index, header in enumerate(readable, start=1):
+            tiles.append(
+                {
+                    "path": header.path,
+                    "series_number": series_number,
+                    "slice_number": index,
+                    "series_slice_count": len(readable),
+                }
+            )
+    return tiles, len(series_rows)
+
+
+def _render_plane_gallery(study: Any, *, plane: str, title: str, description: str) -> None:
+    tiles, series_count = _collect_plane_images(study, plane)
+    st.subheader(title)
+    if not tiles:
+        st.info("Sample không có ảnh ở mặt phẳng này.")
+        return
+
+    st.caption(f"{description} · {series_count} chuỗi MRI · {len(tiles)} ảnh")
+    page_size = 12
+    page_count = (len(tiles) + page_size - 1) // page_size
+    page = 1
+    if page_count > 1:
+        page = st.slider(
+            "Trang ảnh",
+            min_value=1,
+            max_value=page_count,
+            value=1,
+            step=1,
+            key=f"gallery_page_{plane}",
+        )
+    start = (page - 1) * page_size
+    page_tiles = tiles[start : start + page_size]
+    columns = st.columns(4)
+    for index, tile in enumerate(page_tiles):
+        col = columns[index % 4]
+        path = tile["path"]
+        with col:
+            try:
+                mtime_ns = path.stat().st_mtime_ns
+                image = _load_thumbnail(str(path), mtime_ns, 320)
+                st.image(
+                    image,
+                    caption=(
+                        f"Chuỗi {tile['series_number']} · "
+                        f"lát {tile['slice_number']}/{tile['series_slice_count']}"
+                    ),
+                    use_container_width=True,
+                    clamp=True,
+                )
+            except Exception as exc:
+                st.warning(f"Không đọc được một lát ảnh: {type(exc).__name__}: {exc}")
+    st.caption(f"Đang hiển thị ảnh {start + 1}–{start + len(page_tiles)} / {len(tiles)}.")
+
+
+def _render_mri_galleries(study: Any) -> None:
+    st.header("Hình ảnh MRI theo ba hướng chụp")
+    st.caption(
+        "Mỗi ô là một lát cắt MRI. Dùng thanh chọn trang trong từng gallery để xem các lát tiếp theo."
+    )
+    for plane, title, description in PLANE_INFO:
+        _render_plane_gallery(
+            study,
+            plane=plane,
+            title=title,
+            description=description,
+        )
+
+
+def _render_radiology_report(sample_root: Path, study_uid: str, report_path: str) -> None:
+    st.header("Báo cáo bác sĩ")
+    try:
+        report = load_radiology_report(
+            sample_root,
+            study_uid,
+            report_path=report_path or None,
+        )
+    except StudyContextError as exc:
+        st.error(str(exc))
+        return
+
+    if report is None:
+        st.info(
+            "Sample hiện chưa có file báo cáo bác sĩ. Báo cáo gốc nằm trong cột `Report` của "
+            "`train.csv`; hãy chạy notebook `15_export_demo_radiology_report.ipynb` "
+            "và đặt `radiology_report.txt` vào thư mục demo_sample."
+        )
+        return
+
+    source_text = report.source or "Báo cáo văn bản đi kèm sample"
+    verification_text = "Đã đối chiếu mã study" if report.uid_verified else "Không có mã study trong file để đối chiếu"
+    st.caption(f"Nguồn: {source_text} · {verification_text}")
+    with st.container(border=True):
+        st.markdown(report.text, unsafe_allow_html=False)
+    st.caption(
+        "Nội dung được giữ nguyên theo báo cáo nguồn; dashboard chỉ chuẩn hóa khoảng trắng và xuống dòng, "
+        "không tự dịch, diễn giải hay thêm kết luận y khoa."
+    )
+
+
+def _render_predictions(bundle: PredictionBundle) -> None:
+    st.header("Kết quả dự đoán 12 dấu hiệu")
+    blend_status = str(bundle.report.get("blend_status", ""))
+    blend_label = BLEND_LABELS.get(blend_status, "Trạng thái kết hợp không xác định")
+    st.caption(blend_label)
 
     if blend_status == "neutral_fallback_0.5":
         st.warning(
-            "Cả hai nhánh đều không có dự đoán hợp lệ. Dashboard đang hiển thị giá trị trung tính 0.5, "
-            "không phải kết quả suy luận của model."
+            "Hai mô hình đều không tạo được dự đoán hợp lệ. Các giá trị 50% dưới đây là giá trị trung tính "
+            "được dùng để hoàn thiện output, không phải kết quả suy luận của mô hình."
         )
     elif blend_status in {"dinov2_only", "vit_only"}:
-        st.info(
-            "Một nhánh không được dùng trong blend. Kết quả cuối lấy trực tiếp từ nhánh còn hợp lệ; "
-            "trọng số hiệu lực được ghi trong report."
-        )
-    else:
-        st.caption(STATUS_LABELS.get(blend_status, blend_status))
+        st.info("Một trong hai mô hình không khả dụng; kết quả bên dưới chỉ lấy từ mô hình còn hợp lệ.")
+
+    display_rows = []
+    for target, probability in zip(bundle.targets, bundle.ensemble):
+        name, description, group = TARGET_DISPLAY[target]
+        display_rows.append((group, target, name, description, float(probability)))
+
+    group_order = ("Dây chằng", "Sụn chêm", "Thoái hóa khớp", "Dấu hiệu khác")
+    for group in group_order:
+        rows = [row for row in display_rows if row[0] == group]
+        if not rows:
+            continue
+        st.subheader(group)
+        for _, target, name, description, probability in rows:
+            left, right = st.columns([5, 1])
+            with left:
+                st.markdown(f"**{name}**")
+                st.caption(description)
+                st.progress(float(np.clip(probability, 0.0, 1.0)))
+            with right:
+                st.metric("Điểm mô hình", f"{probability * 100:.1f}%")
 
     st.caption(
-        f"Study UID: `{bundle.study_uid}` · Output directory: `{bundle.output_dir}`"
+        "Cách đọc: phần trăm là điểm đầu ra của mô hình cho từng nhãn, không phải tỷ lệ chắc chắn người bệnh mắc bệnh "
+        "và chưa được hiệu chuẩn thành nguy cơ lâm sàng. Không dùng riêng các con số này để chẩn đoán hoặc quyết định điều trị."
     )
 
-    st.subheader("Xác suất theo từng nhãn")
-    threshold = st.slider(
-        "Mốc tham chiếu để sắp xếp / tô nổi bật xác suất (không phải ngưỡng chẩn đoán)",
-        min_value=0.0,
-        max_value=1.0,
-        value=0.5,
-        step=0.05,
-        format="%.2f",
-    )
 
-    chart_table = pd.DataFrame(
-        {
-            "Target": bundle.targets,
-            "DINOv2": bundle.dinov2,
-            "ViT-B/16": bundle.vit,
-            "Ensemble": bundle.ensemble,
+def _render_technical_details(bundle: PredictionBundle, study: Any | None) -> None:
+    with st.expander("Thông tin kỹ thuật dành cho người phát triển"):
+        models = bundle.report.get("models", {})
+        blend = bundle.report.get("blend", {})
+        effective = blend.get("effective_weights", {}) if isinstance(blend, dict) else {}
+        dino = models.get("dinov2", {}) if isinstance(models, dict) else {}
+        vit = models.get("vit_b16", {}) if isinstance(models, dict) else {}
+        dino_meta = dino.get("metadata", {}) if isinstance(dino, dict) else {}
+        vit_meta = vit.get("metadata", {}) if isinstance(vit, dict) else {}
+
+        status_labels = {
+            True: "Được sử dụng",
+            False: "Không được sử dụng",
         }
-    )
-    chart_long = chart_table.melt(
-        id_vars="Target", var_name="Model", value_name="Probability"
-    )
-    chart_long["Probability (%)"] = chart_long["Probability"] * 100.0
-    fig = px.bar(
-        chart_long,
-        x="Target",
-        y="Probability (%)",
-        color="Model",
-        barmode="group",
-        category_orders={"Target": list(bundle.targets)},
-        hover_data={"Probability (%)": ":.2f", "Probability": False},
-        title="So sánh xác suất của hai model và ensemble",
-    )
-    fig.update_layout(
-        yaxis_range=[0, 100],
-        xaxis_title="",
-        yaxis_title="Probability (%)",
-        legend_title="",
-        margin=dict(l=10, r=10, t=55, b=10),
-        height=440,
-    )
-    st.plotly_chart(fig, use_container_width=True)
-
-    table = pd.DataFrame(
-        {
-            "Target": bundle.targets,
-            "DINOv2": bundle.dinov2,
-            "ViT-B/16": bundle.vit,
-            "Ensemble": bundle.ensemble,
-        }
-    )
-    table["|DINOv2 − ViT| (pp)"] = np.abs(bundle.dinov2 - bundle.vit) * 100.0
-    table["So với mốc"] = np.where(
-        bundle.ensemble >= threshold,
-        f"≥ {threshold:.2f}",
-        f"< {threshold:.2f}",
-    )
-    display_table = table.copy()
-    for column in ("DINOv2", "ViT-B/16", "Ensemble"):
-        display_table[column] = display_table[column].map(_format_percent)
-    display_table["|DINOv2 − ViT| (pp)"] = display_table[
-        "|DINOv2 − ViT| (pp)"
-    ].map(lambda x: f"{x:.1f}")
-    st.dataframe(display_table, hide_index=True, use_container_width=True)
-
-    st.markdown("**Trạng thái và nguồn kết quả**")
-    status_col1, status_col2 = st.columns(2)
-    with status_col1:
-        st.write("**DINOv2**")
-        st.write(_model_status_text(report, "dinov2"))
-        st.caption(
-            f"Fold count: {models.get('dinov2', {}).get('metadata', {}).get('fold_count', 'n/a')}"
+        st.write(f"**StudyInstanceUID:** `{bundle.study_uid}`")
+        st.write(f"**DINOv2:** {status_labels.get(dino.get('valid'), 'Không rõ')}")
+        st.write(f"**ViT-B/16:** {status_labels.get(vit.get('valid'), 'Không rõ')}")
+        st.write(
+            f"**Trọng số hiệu lực:** DINOv2 {float(effective.get('dinov2', 0.0)):.0%} · "
+            f"ViT-B/16 {float(effective.get('vit_b16', 0.0)):.0%}"
         )
-    with status_col2:
-        st.write("**ViT-B/16**")
-        st.write(_model_status_text(report, "vit_b16"))
-        st.caption(
-            f"Valid slices: {models.get('vit_b16', {}).get('metadata', {}).get('valid_slices', 'n/a')}"
-        )
-
-    with st.expander("Xem report provenance của Phase 3"):
-        st.json(report, expanded=False)
-
-
-def _series_label(series: Any) -> str:
-    metadata = series.metadata
-    plane = str(metadata.get("Anatomical_Plane", "Unknown plane"))
-    fluid = str(metadata.get("Fluid_Sensitive", "?"))
-    fat = str(metadata.get("Fat_Suppression", "?"))
-    roles = ", ".join(series.selected_for) if series.selected_for else "not mapped"
-    return (
-        f"{plane} · Fluid={fluid} · Fat suppression={fat} · "
-        f"{series.n_files} slices · {roles} · UID …{series.series_uid[-8:]}"
-    )
-
-
-def _render_mri_viewer(sample_path: str, expected_study_uid: str) -> None:
-    st.subheader("MRI DICOM viewer")
-    if not sample_path.strip():
-        st.info("Nhập đường dẫn tới thư mục demo_sample để xem MRI.")
-        return
-    root = Path(sample_path).expanduser()
-    if not root.exists():
-        st.warning(f"Không tìm thấy sample path: `{root}`")
-        return
-
-    try:
-        study = _load_study(str(root))
-    except Exception as exc:
-        st.warning(f"Không tải được DICOM sample: {type(exc).__name__}: {exc}")
-        st.caption(
-            "Dashboard dự đoán vẫn hoạt động độc lập; kiểm tra lại sample path và dependencies DICOM."
-        )
-        return
-
-    if study.study_uid != expected_study_uid:
-        st.error(
-            "StudyInstanceUID của DICOM sample không khớp prediction artifacts. "
-            f"DICOM={study.study_uid} · Predictions={expected_study_uid}."
-        )
-        return
-
-    summary = study.series_summary()
-    st.caption(
-        f"{len(study.series)} selected series · "
-        f"{sum(item.n_files for item in study.series.values())} DICOM files · "
-        f"Study UID khớp với prediction artifacts"
-    )
-
-    series_list = list(study.series.values())
-    if not series_list:
-        st.warning("Sample không có series để hiển thị.")
-        return
-
-    series_by_label = {_series_label(item): item for item in series_list}
-    labels = list(series_by_label)
-    selected_label = st.selectbox("Chọn series / plane / role", labels)
-    selected_series = series_by_label[selected_label]
-    readable_files = [item for item in selected_series.files if not item.header_error]
-    if not readable_files:
-        st.error("Series không có DICOM header hợp lệ để hiển thị.")
-        return
-
-    default_index = len(readable_files) // 2
-    slice_index = st.slider(
-        "Slice index (theo thứ tự đã audit)",
-        min_value=0,
-        max_value=len(readable_files) - 1,
-        value=default_index,
-        step=1,
-        key=f"slice_{selected_series.series_uid}",
-    )
-    dicom_header = readable_files[slice_index]
-
-    image_col, meta_col = st.columns([1.35, 1])
-    with image_col:
-        try:
-            modified_ns = dicom_header.path.stat().st_mtime_ns
-            preview = _load_preview(str(dicom_header.path), modified_ns)
-            st.image(
-                preview,
-                caption=(
-                    f"{dicom_header.filename} · slice {slice_index + 1}/{len(readable_files)}"
-                ),
-                use_container_width=True,
-                clamp=True,
+        if dino_meta:
+            st.write(f"**Số fold DINOv2:** {dino_meta.get('fold_count', 'Không có dữ liệu')}")
+        if vit_meta:
+            st.write(f"**Số lát hợp lệ của ViT:** {vit_meta.get('valid_slices', 'Không có dữ liệu')}")
+        if study is not None:
+            st.write(f"**Số chuỗi MRI:** {len(study.series)}")
+            st.write(
+                f"**Số file DICOM:** {sum(item.n_files for item in study.series.values())}"
             )
-        except Exception as exc:
-            st.error(f"Không decode được pixel data: {type(exc).__name__}: {exc}")
-    with meta_col:
-        st.markdown("**Thông tin series**")
-        info = {
-            "Anatomical plane": selected_series.metadata.get("Anatomical_Plane", ""),
-            "Fluid sensitive": selected_series.metadata.get("Fluid_Sensitive", ""),
-            "Fat suppression": selected_series.metadata.get("Fat_Suppression", ""),
-            "Number of slices": selected_series.n_files,
-            "Valid headers": selected_series.usable_header_count,
-            "Sort mode": selected_series.sort_mode,
-            "Selected for": selected_series.selected_for,
-            "SeriesInstanceUID": selected_series.series_uid,
-            "Filename": dicom_header.filename,
-            "InstanceNumber": dicom_header.instance_number,
-            "Projected position (mm)": dicom_header.projected_position_mm,
-        }
-        st.json(info, expanded=True)
-        if selected_series.warnings:
-            st.warning(" · ".join(selected_series.warnings))
-
-    with st.expander("Metadata của toàn bộ selected series"):
-        st.dataframe(summary, hide_index=True, use_container_width=True)
+        st.write(f"**Thư mục output:** `{bundle.output_dir}`")
 
 
 def main() -> None:
-    st.title("RSNA Knee MRI — Local Demo")
+    st.title("RSNA Knee MRI — Trình xem study")
     st.caption(
-        "Study-level predictions · DINOv2 + ViT-B/16 ensemble · Read-only visualization"
+        "Thông tin người bệnh · Ảnh MRI ba hướng · Báo cáo bác sĩ · Điểm dự đoán của mô hình"
     )
 
     with st.sidebar:
-        st.header("Đường dẫn dữ liệu")
+        st.header("Dữ liệu đầu vào")
         output_default = PROJECT_ROOT / "demo" / "output" / "ensemble"
         output_text = st.text_input(
-            "Phase 3 ensemble output directory",
+            "Thư mục kết quả Phase 3",
             value=str(output_default),
-            help="Thư mục chứa ensemble_prediction.csv, ensemble_prediction_long.csv và ensemble_report.json.",
+            help="Thư mục chứa bốn artifact ensemble đã kiểm tra ở Phase 3.",
         )
         sample_text = st.text_input(
-            "Extracted DICOM sample directory",
+            "Thư mục DICOM sample",
             value=_sample_default(),
-            help=(
-                "Thư mục chứa manifest.json, series_metadata.csv, series_selection.csv và dicom/. "
-                "Ưu tiên đường dẫn ngắn như C:\\rsna_demo\\demo_sample để tránh giới hạn path của Windows."
-            ),
+            help="Thư mục chứa manifest.json, series_metadata.csv, series_selection.csv và dicom/.",
         )
-        if sample_text.strip() and len(str(Path(sample_text).expanduser())) > 40:
-            st.warning(
-                "Đường dẫn sample đang khá dài. DICOM được lồng qua Study UID, Series UID và "
-                "tên file nên full path có thể vượt giới hạn MAX_PATH truyền thống của Windows. "
-                "Ưu tiên C:\\rsna_demo\\demo_sample nếu thư mục này đã được audit."
-            )
-        show_mri = st.checkbox("Hiển thị MRI DICOM viewer", value=True)
+        report_text = st.text_input(
+            "Đường dẫn báo cáo bác sĩ (tùy chọn)",
+            value=_report_default(_sample_default()),
+            help="Mặc định app tìm radiology_report.txt trong thư mục DICOM sample.",
+        )
         st.divider()
-        st.caption(f"Project root: `{PROJECT_ROOT}`")
-        st.caption("Dashboard không tải checkpoint hoặc chạy model inference.")
+        st.caption("Dashboard chỉ đọc dữ liệu và kết quả đã lưu; không chạy lại model inference.")
 
     try:
         bundle = load_prediction_bundle(output_text)
     except (DashboardDataError, OSError, ValueError) as exc:
-        st.error(f"Không thể tải prediction artifacts: {exc}")
-        st.info(
-            "Hãy chạy thành công Notebook 14 (Phase 3), sau đó kiểm tra lại đường dẫn ensemble output."
-        )
+        st.error(f"Không thể tải kết quả dự đoán: {exc}")
+        st.info("Kiểm tra lại thư mục output Phase 3 và chạy thành công Notebook 14 nếu cần.")
         st.stop()
 
-    _render_prediction_section(bundle)
+    study = None
+    sample_root = Path(sample_text).expanduser()
+    if sample_text.strip() and sample_root.exists():
+        try:
+            study = _load_study(str(sample_root))
+        except Exception as exc:
+            st.warning(f"Không tải được DICOM sample: {type(exc).__name__}: {exc}")
+    else:
+        st.info("Chưa tìm thấy thư mục DICOM sample. Kết quả dự đoán vẫn có thể xem độc lập.")
 
-    if show_mri:
-        st.divider()
-        _render_mri_viewer(sample_text, bundle.study_uid)
+    if study is not None:
+        if study.study_uid != bundle.study_uid:
+            st.error(
+                "DICOM sample và kết quả dự đoán không thuộc cùng một study. "
+                "Dashboard dừng hiển thị thông tin người bệnh, ảnh MRI và báo cáo để tránh ghép nhầm dữ liệu."
+            )
+            study = None
+        else:
+            try:
+                _render_patient_info(read_patient_info(study))
+            except Exception as exc:
+                st.warning(f"Không đọc được một số metadata người bệnh: {type(exc).__name__}: {exc}")
+            _render_mri_galleries(study)
+            _render_radiology_report(study.root, study.study_uid, report_text)
+    else:
+        st.info("Hãy cấu hình đúng thư mục DICOM sample để xem thông tin người bệnh và ba gallery MRI.")
+
+    st.divider()
+    _render_predictions(bundle)
+    _render_technical_details(bundle, study)
 
     st.divider()
     st.caption(
-        "Lưu ý: đây là xác suất đầu ra của mô hình cho một sample thuộc gold_validation, "
-        "không phải chẩn đoán y khoa, không phải xác suất bệnh đã được hiệu chuẩn, "
-        "và không phải một ước lượng validation độc lập hay điểm số Kaggle mới. "
-        "Ảnh MRI trong viewer chỉ dùng cho quan sát; windowing hiển thị không thay thế preprocessing của model."
+        "Đây là demo nghiên cứu trên một sample thuộc gold_validation. Điểm dự đoán không phải chẩn đoán, "
+        "không phải xác suất lâm sàng đã hiệu chuẩn và không phải một kết quả validation độc lập. "
+        "Ảnh hiển thị đã được windowing để quan sát; cách hiển thị không thay thế preprocessing của model."
     )
 
 

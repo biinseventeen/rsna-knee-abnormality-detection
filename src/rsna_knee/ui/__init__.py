@@ -1,1 +1,1 @@
-"""Read-only Streamlit dashboard for the local RSNA knee demo."""
+"""Streamlit dashboard and display-only helpers for the RSNA knee demo."""
