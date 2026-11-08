@@ -19,6 +19,8 @@ from typing import Any, Iterable
 import numpy as np
 import pandas as pd
 
+from .paths import long_path
+
 REQUIRED_METADATA_COLUMNS = {
     "StudyInstanceUID",
     "SeriesInstanceUID",
@@ -145,7 +147,7 @@ def _safe_float(value: Any) -> float | None:
 
 
 def _find_sample_root(path: Path) -> Path:
-    path = path.expanduser().resolve()
+    path = long_path(path)
     if (path / "manifest.json").is_file() and (path / "series_metadata.csv").is_file():
         return path
     nested = path / "demo_sample"
@@ -168,6 +170,51 @@ def _find_sample_root(path: Path) -> Path:
     )
 
 
+def discover_demo_samples(source: str | Path) -> list[Path]:
+    """Find exported study packages beneath a directory, or return one ZIP."""
+    root = long_path(source)
+    if not root.exists():
+        raise FileNotFoundError(f"Demo sample path does not exist: {source}")
+    if root.is_file():
+        if root.suffix.lower() == ".zip":
+            return [root]
+        raise ValueError("Sample input must be a demo package directory or ZIP file.")
+
+    def is_package(directory: Path) -> bool:
+        required = ("manifest.json", "series_metadata.csv", "series_selection.csv")
+        return all((directory / name).is_file() for name in required) and (
+            directory / "dicom"
+        ).is_dir()
+
+    if is_package(root):
+        return [root]
+    packages: list[Path] = []
+    pending = [root]
+    while pending:
+        directory = pending.pop()
+        if is_package(directory):
+            packages.append(directory)
+            # Do not descend into the package's DICOM tree, which may contain
+            # thousands of files and very long paths.
+            continue
+        try:
+            children = [child for child in directory.iterdir() if child.is_dir()]
+        except OSError:
+            continue
+        pending.extend(
+            child for child in children
+            if child.name.casefold() not in {"dicom", ".git", ".venv", "__pycache__"}
+            and not child.name.startswith(".")
+        )
+    packages = sorted(set(packages), key=lambda item: str(item).casefold())
+    if not packages:
+        raise FileNotFoundError(
+            f"No exported study packages found under {source}. Expected folders with "
+            "manifest.json, series_metadata.csv, series_selection.csv and dicom/."
+        )
+    return packages
+
+
 def _safe_extract_zip(
     archive_path: Path,
     destination: Path,
@@ -176,8 +223,8 @@ def _safe_extract_zip(
     max_members: int = 100_000,
 ) -> Path:
     """Extract an export ZIP while rejecting path traversal and oversized archives."""
-    archive_path = archive_path.expanduser().resolve()
-    destination = destination.expanduser().resolve()
+    archive_path = long_path(archive_path)
+    destination = long_path(destination)
     destination.mkdir(parents=True, exist_ok=True)
 
     with zipfile.ZipFile(archive_path, "r") as archive:
@@ -247,7 +294,7 @@ def _read_dicom_headers(series_dir: Path) -> tuple[list[SliceHeader], str]:
     for path in paths:
         try:
             ds = pydicom.dcmread(
-                str(path),
+                str(long_path(path)),
                 stop_before_pixels=True,
                 force=True,
                 specific_tags=HEADER_TAGS,
@@ -410,14 +457,14 @@ def load_demo_sample(
         Destination used only when ``source`` is a ZIP. By default a sibling
         ``<zip-stem>_extracted`` directory is created.
     """
-    source_path = Path(source).expanduser().resolve()
+    source_path = long_path(source)
     if not source_path.exists():
         raise FileNotFoundError(f"Không tìm thấy demo sample: {source_path}")
 
     extracted_from: Path | None = None
     if source_path.is_file() and source_path.suffix.lower() == ".zip":
         target = (
-            Path(extract_dir).expanduser().resolve()
+            long_path(extract_dir)
             if extract_dir is not None
             else source_path.parent / f"{source_path.stem}_extracted"
         )
@@ -587,7 +634,7 @@ def audit_demo_sample(
             if readable:
                 probe = readable[len(readable) // 2]
                 try:
-                    ds = pydicom.dcmread(str(probe.path), force=True)
+                    ds = pydicom.dcmread(str(long_path(probe.path)), force=True)
                     pixels = np.asarray(ds.pixel_array)
                     if pixels.size == 0:
                         raise ValueError("pixel_array rỗng")

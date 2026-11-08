@@ -22,6 +22,8 @@ from typing import Any, Mapping, Sequence
 
 import numpy as np
 
+from ..dicom.paths import long_path
+
 IMAGE_SIZE = 224
 MAX_TOTAL_SLICES = 36
 SLICES_PER_SERIES = 12
@@ -115,7 +117,7 @@ def read_sorted_dicom_headers(series_dir: str | Path) -> list[dict[str, Any]]:
     for path in paths:
         try:
             ds = pydicom.dcmread(
-                str(path),
+                str(long_path(path)),
                 stop_before_pixels=True,
                 force=True,
                 specific_tags=["ImagePositionPatient", "ImageOrientationPatient", "InstanceNumber"],
@@ -174,7 +176,7 @@ def read_sorted_dicom_headers(series_dir: str | Path) -> list[dict[str, Any]]:
 def decode_dicom_slice(path: str | Path) -> np.ndarray:
     """Decode one MRI slice using the exact final submission conversion."""
     pydicom = _require_pydicom()
-    ds = pydicom.dcmread(str(path), force=True)
+    ds = pydicom.dcmread(str(long_path(path)), force=True)
     pixels = np.asarray(ds.pixel_array)
 
     if pixels.ndim == 3:

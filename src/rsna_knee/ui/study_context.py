@@ -11,6 +11,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable
 
+from ..dicom.paths import long_path
+
 
 @dataclass(frozen=True)
 class PatientInfo:
@@ -162,7 +164,7 @@ def read_patient_info(study: Any) -> PatientInfo:
             continue
         try:
             dataset = pydicom.dcmread(
-                str(probe.path),
+                str(long_path(probe.path)),
                 stop_before_pixels=True,
                 force=True,
                 specific_tags=specific_tags,
@@ -233,10 +235,10 @@ def load_radiology_report(
     report_path: str | Path | None = None,
 ) -> RadiologyReport | None:
     """Load a plain-text report, validating its optional StudyInstanceUID header."""
-    root = Path(sample_root).expanduser().resolve()
+    root = long_path(sample_root)
     candidates: list[Path] = []
     if report_path is not None and str(report_path).strip():
-        candidates.append(Path(report_path).expanduser().resolve())
+        candidates.append(long_path(report_path))
     else:
         candidates.extend(root / name for name in REPORT_CANDIDATES)
 

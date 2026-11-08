@@ -5,12 +5,14 @@ from typing import Iterable
 
 import pydicom
 
+from .paths import long_path
+
 
 def find_dicom_files(inputs: Iterable[Path]) -> list[Path]:
     files: list[Path] = []
 
     for item in inputs:
-        item = Path(item)
+        item = long_path(item)
         if item.is_dir():
             for p in item.rglob("*"):
                 if p.is_file() and (p.suffix.lower() in {".dcm", ""}):
@@ -22,7 +24,7 @@ def find_dicom_files(inputs: Iterable[Path]) -> list[Path]:
 
 
 def load_dicom(path: Path):
-    return pydicom.dcmread(str(path), force=True)
+    return pydicom.dcmread(str(long_path(path)), force=True)
 
 
 def load_dicom_header(path: Path) -> dict:

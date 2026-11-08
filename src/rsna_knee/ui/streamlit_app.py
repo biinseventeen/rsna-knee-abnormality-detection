@@ -37,9 +37,11 @@ from rsna_knee.ui.dashboard_data import (  # noqa: E402
     DashboardDataError,
     PredictionBundle,
     TARGETS,
+    find_prediction_dir,
     load_prediction_bundle,
 )
 from rsna_knee.ui.dicom_display import read_dicom_thumbnail  # noqa: E402
+from rsna_knee.dicom.paths import long_path  # noqa: E402
 from rsna_knee.ui.study_context import (  # noqa: E402
     PatientInfo,
     StudyContextError,
@@ -146,14 +148,14 @@ BLEND_LABELS = {
 
 def _sample_default() -> str:
     configured = os.environ.get("RSNA_DEMO_SAMPLE", "").strip()
-    if configured and Path(configured).exists():
+    if configured and long_path(configured).exists():
         return configured
     candidates = [
         Path(r"C:\rsna_demo\demo_sample"),
-        PROJECT_ROOT / "demo" / "input" / "demo_sample",
+        PROJECT_ROOT / "demo" / "input",
     ]
     for candidate in candidates:
-        if candidate.is_dir():
+        if long_path(candidate).is_dir():
             return str(candidate)
     return str(candidates[-1])
 
@@ -172,6 +174,13 @@ def _load_study(sample_path: str):
     from rsna_knee.dicom.sample import load_demo_sample
 
     return load_demo_sample(sample_path)
+
+
+@st.cache_data(show_spinner=False, ttl=5)
+def _discover_sample_paths(sample_root: str) -> list[str]:
+    from rsna_knee.dicom.sample import discover_demo_samples
+
+    return [str(path) for path in discover_demo_samples(sample_root)]
 
 
 @st.cache_data(show_spinner=False, max_entries=96)
@@ -414,57 +423,77 @@ def main() -> None:
             value=_sample_default(),
             help="Thư mục chứa manifest.json, series_metadata.csv, series_selection.csv và dicom/.",
         )
+        st.caption(
+            "Use one exported package or a parent folder containing one package per study. "
+            "Each package needs its own manifest, metadata/selection CSVs, and DICOM folder."
+        )
         report_text = st.text_input(
             "Đường dẫn báo cáo bác sĩ (tùy chọn)",
-            value=_report_default(_sample_default()),
+            value="",
             help="Mặc định app tìm radiology_report.txt trong thư mục DICOM sample.",
         )
         st.divider()
         st.caption("Dashboard chỉ đọc dữ liệu và kết quả đã lưu; không chạy lại model inference.")
 
-    try:
-        bundle = load_prediction_bundle(output_text)
-    except (DashboardDataError, OSError, ValueError) as exc:
-        st.error(f"Không thể tải kết quả dự đoán: {exc}")
-        st.info("Kiểm tra lại thư mục output Phase 3 và chạy thành công Notebook 14 nếu cần.")
-        st.stop()
-
     study = None
-    sample_root = Path(sample_text).expanduser()
-    if sample_text.strip() and sample_root.exists():
+    try:
+        sample_source = sample_text.strip()
+        if not sample_source:
+            raise ValueError("Enter a study package or its parent directory.")
+        sample_paths = _discover_sample_paths(sample_source)
+        if len(sample_paths) > 1:
+            selected_sample = st.selectbox(
+                "Study package",
+                options=sample_paths,
+                format_func=lambda value: f"{Path(value).parent.name}/{Path(value).name}",
+            )
+        else:
+            selected_sample = sample_paths[0]
+        study = _load_study(selected_sample)
+    except Exception as exc:
+        st.warning(f"Could not load a study package: {type(exc).__name__}: {exc}")
+
+    bundle = None
+    if study is not None:
         try:
-            study = _load_study(str(sample_root))
-        except Exception as exc:
-            st.warning(f"Không tải được DICOM sample: {type(exc).__name__}: {exc}")
+            prediction_dir = find_prediction_dir(output_text, study.study_uid)
+            bundle = load_prediction_bundle(prediction_dir)
+        except (DashboardDataError, OSError, ValueError) as exc:
+            st.info(
+                f"No valid saved predictions for study {study.study_uid}. "
+                f"MRI images and study metadata are still available. Details: {exc}"
+            )
     else:
-        st.info("Chưa tìm thấy thư mục DICOM sample. Kết quả dự đoán vẫn có thể xem độc lập.")
+        # Keep the existing predictions-only view available when no DICOM
+        # package is configured or can be loaded.
+        try:
+            bundle = load_prediction_bundle(output_text)
+        except (DashboardDataError, OSError, ValueError) as exc:
+            st.error(f"Could not load ensemble predictions: {exc}")
 
     if study is not None:
-        if study.study_uid != bundle.study_uid:
-            st.error(
-                "DICOM sample và kết quả dự đoán không thuộc cùng một study. "
-                "Dashboard dừng hiển thị thông tin người bệnh, ảnh MRI và báo cáo để tránh ghép nhầm dữ liệu."
-            )
-            study = None
-        else:
-            try:
-                _render_patient_info(read_patient_info(study))
-            except Exception as exc:
-                st.warning(f"Không đọc được một số metadata người bệnh: {type(exc).__name__}: {exc}")
-            _render_mri_galleries(study)
-            _render_radiology_report(study.root, study.study_uid, report_text)
-    else:
-        st.info("Hãy cấu hình đúng thư mục DICOM sample để xem thông tin người bệnh và ba gallery MRI.")
+        try:
+            _render_patient_info(read_patient_info(study))
+        except Exception as exc:
+            st.warning(f"Could not read some patient metadata: {type(exc).__name__}: {exc}")
+        _render_mri_galleries(study)
+        _render_radiology_report(study.root, study.study_uid, report_text)
 
-    st.divider()
-    _render_predictions(bundle)
-    _render_technical_details(bundle, study)
+    if bundle is not None:
+        st.divider()
+        _render_predictions(bundle)
+        _render_technical_details(bundle, study)
+    elif study is None:
+        st.info(
+            "Select a valid exported study package to browse its MRI galleries. "
+            "To show model scores, add a matching Phase 3 output bundle."
+        )
 
     st.divider()
     st.caption(
-        "Đây là demo nghiên cứu trên một sample thuộc gold_validation. Điểm dự đoán không phải chẩn đoán, "
-        "không phải xác suất lâm sàng đã hiệu chuẩn và không phải một kết quả validation độc lập. "
-        "Ảnh hiển thị đã được windowing để quan sát; cách hiển thị không thay thế preprocessing của model."
+        "This viewer shows MRI images for the selected study and saved model scores when available. "
+        "Scores are not diagnoses or clinically calibrated risks. MRI thumbnails are windowed for display "
+        "and are not the model input preprocessing."
     )
 
 

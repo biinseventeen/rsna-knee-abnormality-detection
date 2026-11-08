@@ -7,6 +7,8 @@ from typing import Any
 
 import numpy as np
 
+from ..dicom.paths import long_path
+
 
 def _first_number(value: Any) -> float | None:
     if value is None:
@@ -72,7 +74,7 @@ def read_dicom_preview(path: str | Path) -> np.ndarray:
             "Thiếu pydicom. Cài dependencies giao diện bằng `python -m pip install -r requirements-ui.txt`."
         ) from exc
 
-    dicom_path = Path(path).expanduser().resolve()
+    dicom_path = long_path(path)
     dataset = pydicom.dcmread(str(dicom_path), force=True)
     pixels = np.asarray(dataset.pixel_array, dtype=np.float32)
     slope = _first_number(getattr(dataset, "RescaleSlope", 1.0))

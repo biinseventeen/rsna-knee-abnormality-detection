@@ -19,6 +19,8 @@ from typing import Any, Mapping
 
 import numpy as np
 
+from ..dicom.paths import long_path
+
 IMAGE_SIZE = 224
 PATCH_SIZE = 14
 N_ROLE_SLICES = 12
@@ -122,7 +124,7 @@ def read_sorted_dicom_headers(series_dir: Path) -> tuple[list[dict[str, Any]], s
     for path in files:
         try:
             ds = pydicom.dcmread(
-                str(path),
+                str(long_path(path)),
                 stop_before_pixels=True,
                 force=True,
                 specific_tags=DICOM_HEADER_TAGS,
@@ -206,7 +208,7 @@ def decode_dicom_slice(path: Path) -> tuple[np.ndarray, Any]:
             "Thiếu pydicom. Cài bằng `python -m pip install 'pydicom>=3.0'`."
         ) from exc
 
-    ds = pydicom.dcmread(str(path), force=True)
+    ds = pydicom.dcmread(str(long_path(path)), force=True)
     pixels = np.asarray(ds.pixel_array)
     if pixels.ndim == 3:
         if pixels.shape[-1] in (3, 4):

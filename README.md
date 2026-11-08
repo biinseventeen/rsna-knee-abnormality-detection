@@ -33,6 +33,8 @@ ensemble_report.json
 
 The sample directory must contain `manifest.json`, `series_metadata.csv`, `series_selection.csv`, and `dicom/`. A `radiology_report.txt` can be added to show the source report; Notebook 15 exports it from Kaggle `train.csv`. The app checks that the sample and prediction artifacts refer to the same study before showing MRI images.
 
+To browse multiple studies, add one complete exported package per study under a common directory, for example `demo/input/studies/<study-folder>/manifest.json` plus that package's metadata, selection CSV, and `dicom/` tree. Point the dashboard's sample path at the common `studies` directory; it will offer a study selector. For scores, place each study's four Phase 3 files under `demo/output/ensemble/<StudyInstanceUID>/`. The dashboard matches the selected study to its output report. If there is no matching output yet, it still shows that study's metadata and MRI galleries.
+
 ## Reproduce a local prediction
 
 ### Inputs and dependencies

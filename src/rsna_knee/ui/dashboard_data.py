@@ -15,6 +15,8 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
+from ..dicom.paths import long_path
+
 TARGETS: tuple[str, ...] = (
     "ACL",
     "MCL",
@@ -46,6 +48,59 @@ class PredictionBundle:
     long_table: pd.DataFrame
     report: dict[str, Any]
     output_dir: Path
+
+
+def find_prediction_dir(output_root: str | Path, study_uid: str) -> Path:
+    """Find the Phase 3 bundle for a study in a shared output directory.
+
+    A single-study output directory remains supported. For multiple studies,
+    bundles may be placed in ``<output_root>/<StudyInstanceUID>/`` (or any
+    nested directory below the selected output root); the report UID selects
+    the matching bundle.
+    """
+    root = long_path(output_root)
+    if not root.is_dir():
+        raise DashboardDataError(f"Ensemble output directory does not exist: {output_root}")
+
+    direct_report = root / "ensemble_report.json"
+    if direct_report.is_file():
+        try:
+            direct = json.loads(direct_report.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise DashboardDataError(f"Cannot read ensemble report {direct_report}: {exc}") from exc
+        if (
+            isinstance(direct, dict)
+            and str(direct.get("study_instance_uid", "")).strip()
+            == str(study_uid).strip()
+        ):
+            return root
+
+    candidates: set[Path] = set()
+    for report_path in root.rglob("ensemble_report.json"):
+        if report_path == direct_report:
+            continue
+        try:
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if (
+            isinstance(report, dict)
+            and str(report.get("study_instance_uid", "")).strip()
+            == str(study_uid).strip()
+        ):
+            candidates.add(report_path.parent)
+
+    if not candidates:
+        raise DashboardDataError(
+            f"No Phase 3 prediction bundle for study {study_uid!r} under {output_root}. "
+            "A study can still be browsed without predictions."
+        )
+    if len(candidates) > 1:
+        matches = "\n".join(str(path) for path in sorted(candidates, key=str))
+        raise DashboardDataError(
+            f"Multiple Phase 3 bundles match study {study_uid!r}:\n{matches}"
+        )
+    return next(iter(candidates))
 
 
 def _read_json(path: Path) -> dict[str, Any]:
@@ -141,19 +196,19 @@ def _csv_bool_column(frame: pd.DataFrame, column: str) -> np.ndarray:
 
 def load_prediction_bundle(output_dir: str | Path) -> PredictionBundle:
     """Read and cross-check all four Phase 3 artifacts for one demo study."""
-    root = Path(output_dir).expanduser().resolve()
+    root = long_path(output_dir)
     wide_path = root / "ensemble_prediction.csv"
-    long_path = root / "ensemble_prediction_long.csv"
+    long_csv_path = root / "ensemble_prediction_long.csv"
     npz_path = root / "ensemble_prediction.npz"
     report_path = root / "ensemble_report.json"
 
-    for path in (wide_path, long_path, npz_path, report_path):
+    for path in (wide_path, long_csv_path, npz_path, report_path):
         if not path.is_file():
             raise DashboardDataError(f"Thiếu output Phase 3: {path}")
 
     try:
         wide = pd.read_csv(wide_path)
-        long_table = pd.read_csv(long_path)
+        long_table = pd.read_csv(long_csv_path)
     except Exception as exc:
         raise DashboardDataError(f"Không đọc được CSV output Phase 3: {exc}") from exc
     arrays = _read_npz(npz_path)
