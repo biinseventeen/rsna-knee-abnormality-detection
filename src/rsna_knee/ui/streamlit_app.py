@@ -6,6 +6,7 @@ It never loads model checkpoints or runs DINOv2/ViT inference.
 
 from __future__ import annotations
 
+import json
 import os
 import sys
 from pathlib import Path
@@ -151,8 +152,9 @@ def _sample_default() -> str:
     if configured and long_path(configured).exists():
         return configured
     candidates = [
-        Path(r"C:\rsna_demo\demo_sample"),
+        PROJECT_ROOT / "demo" / "input" / "demo_sample",
         PROJECT_ROOT / "demo" / "input",
+        Path(r"C:\rsna_demo\demo_sample"),
     ]
     for candidate in candidates:
         if long_path(candidate).is_dir():
@@ -181,6 +183,18 @@ def _discover_sample_paths(sample_root: str) -> list[str]:
     from rsna_knee.dicom.sample import discover_demo_samples
 
     return [str(path) for path in discover_demo_samples(sample_root)]
+
+
+def _sample_label(sample_path: str) -> str:
+    """Create a short, distinguishable label for a study package."""
+    path = long_path(sample_path)
+    try:
+        manifest = json.loads((path / "manifest.json").read_text(encoding="utf-8"))
+        study_uid = str(manifest.get("source", {}).get("study_instance_uid", ""))
+    except (OSError, json.JSONDecodeError, AttributeError):
+        study_uid = ""
+    suffix = f" · …{study_uid[-10:]}" if study_uid else ""
+    return f"{path.name}{suffix}"
 
 
 @st.cache_data(show_spinner=False, max_entries=96)
@@ -406,52 +420,71 @@ def _render_technical_details(bundle: PredictionBundle, study: Any | None) -> No
 
 def main() -> None:
     st.title("RSNA Knee MRI — Trình xem study")
-    st.caption(
-        "Thông tin người bệnh · Ảnh MRI ba hướng · Báo cáo bác sĩ · Điểm dự đoán của mô hình"
-    )
+    st.caption("Thông tin người bệnh · Ảnh MRI ba hướng · Báo cáo bác sĩ · Điểm dự đoán của mô hình")
 
+    output_default = PROJECT_ROOT / "demo" / "output" / "ensemble"
+    selected_sample: str | None = None
+    sample_paths: list[str] = []
     with st.sidebar:
-        st.header("Dữ liệu đầu vào")
-        output_default = PROJECT_ROOT / "demo" / "output" / "ensemble"
-        output_text = st.text_input(
-            "Thư mục kết quả Phase 3",
-            value=str(output_default),
-            help="Thư mục chứa bốn artifact ensemble đã kiểm tra ở Phase 3.",
-        )
-        sample_text = st.text_input(
-            "Thư mục DICOM sample",
-            value=_sample_default(),
-            help="Thư mục chứa manifest.json, series_metadata.csv, series_selection.csv và dicom/.",
-        )
-        st.caption(
-            "Use one exported package or a parent folder containing one package per study. "
-            "Each package needs its own manifest, metadata/selection CSVs, and DICOM folder."
-        )
-        report_text = st.text_input(
-            "Đường dẫn báo cáo bác sĩ (tùy chọn)",
-            value="",
-            help="Mặc định app tìm radiology_report.txt trong thư mục DICOM sample.",
-        )
+        st.header("Trình xem study")
+        st.caption("Chọn study để xem ảnh MRI và điểm dự đoán đã lưu.")
+        with st.expander("Thư viện study", expanded=False):
+            sample_root = st.text_input(
+                "Thư mục chứa các study",
+                value=_sample_default(),
+                help=(
+                    "Chọn một gói đã xuất hoặc thư mục cha chứa nhiều gói. "
+                    "Mỗi gói cần manifest.json, series_metadata.csv, series_selection.csv và thư mục dicom/."
+                ),
+            )
+            if st.button("Làm mới danh sách study", use_container_width=True):
+                _discover_sample_paths.clear()
+                st.rerun()
+
+        try:
+            source = sample_root.strip()
+            if source:
+                sample_paths = _discover_sample_paths(source)
+        except (OSError, ValueError) as exc:
+            st.error(f"Không thể đọc thư mục này: {exc}")
+
+        if sample_paths:
+            selected_sample = st.selectbox(
+                "Chọn study",
+                options=sample_paths,
+                format_func=_sample_label,
+                help="Tên thư mục và phần cuối của Study UID giúp phân biệt các study.",
+            )
+            st.caption(f"Tìm thấy {len(sample_paths)} gói study.")
+        else:
+            st.info(
+                "Chưa tìm thấy gói study. Hãy thêm một gói đã xuất đầy đủ vào thư viện, "
+                "sau đó nhấn Làm mới danh sách study."
+            )
+
+        with st.expander("Cài đặt nâng cao", expanded=False):
+            output_text = st.text_input(
+                "Thư mục kết quả dự đoán Phase 3",
+                value=str(output_default),
+                help=(
+                    "Ứng dụng ghép kết quả với study đã chọn bằng StudyInstanceUID. "
+                    "Thông thường có thể dùng thư mục mặc định demo/output/ensemble."
+                ),
+            )
+            report_text = st.text_input(
+                "Đường dẫn báo cáo bác sĩ (không bắt buộc)",
+                value="",
+                help="Để trống để dùng báo cáo đi kèm study đã chọn, nếu có.",
+            )
         st.divider()
-        st.caption("Dashboard chỉ đọc dữ liệu và kết quả đã lưu; không chạy lại model inference.")
+        st.caption("Trình xem đọc file DICOM và kết quả dự đoán đã lưu; không chạy suy luận mô hình.")
 
     study = None
-    try:
-        sample_source = sample_text.strip()
-        if not sample_source:
-            raise ValueError("Enter a study package or its parent directory.")
-        sample_paths = _discover_sample_paths(sample_source)
-        if len(sample_paths) > 1:
-            selected_sample = st.selectbox(
-                "Study package",
-                options=sample_paths,
-                format_func=lambda value: f"{Path(value).parent.name}/{Path(value).name}",
-            )
-        else:
-            selected_sample = sample_paths[0]
-        study = _load_study(selected_sample)
-    except Exception as exc:
-        st.warning(f"Could not load a study package: {type(exc).__name__}: {exc}")
+    if selected_sample:
+        try:
+            study = _load_study(selected_sample)
+        except Exception as exc:
+            st.error(f"Không thể mở study đã chọn: {type(exc).__name__}: {exc}")
 
     bundle = None
     if study is not None:
@@ -460,22 +493,17 @@ def main() -> None:
             bundle = load_prediction_bundle(prediction_dir)
         except (DashboardDataError, OSError, ValueError) as exc:
             st.info(
-                f"No valid saved predictions for study {study.study_uid}. "
-                f"MRI images and study metadata are still available. Details: {exc}"
+                f"Không tìm thấy kết quả dự đoán hợp lệ cho study {study.study_uid}. "
+                f"Bạn vẫn có thể xem ảnh MRI và thông tin study. Chi tiết: {exc}"
             )
-    else:
-        # Keep the existing predictions-only view available when no DICOM
-        # package is configured or can be loaded.
-        try:
-            bundle = load_prediction_bundle(output_text)
-        except (DashboardDataError, OSError, ValueError) as exc:
-            st.error(f"Could not load ensemble predictions: {exc}")
 
     if study is not None:
+        st.subheader(_sample_label(selected_sample))
+        st.caption(f"StudyInstanceUID: `{study.study_uid}`")
         try:
             _render_patient_info(read_patient_info(study))
         except Exception as exc:
-            st.warning(f"Could not read some patient metadata: {type(exc).__name__}: {exc}")
+            st.warning(f"Không đọc được một số metadata người bệnh: {type(exc).__name__}: {exc}")
         _render_mri_galleries(study)
         _render_radiology_report(study.root, study.study_uid, report_text)
 
@@ -485,17 +513,16 @@ def main() -> None:
         _render_technical_details(bundle, study)
     elif study is None:
         st.info(
-            "Select a valid exported study package to browse its MRI galleries. "
-            "To show model scores, add a matching Phase 3 output bundle."
+            "Chọn một study ở thanh bên để bắt đầu. Nếu danh sách trống, hãy chọn thư mục thư viện trong mục "
+            "Thư viện study rồi làm mới danh sách."
         )
 
     st.divider()
     st.caption(
-        "This viewer shows MRI images for the selected study and saved model scores when available. "
-        "Scores are not diagnoses or clinically calibrated risks. MRI thumbnails are windowed for display "
-        "and are not the model input preprocessing."
+        "Trình xem hiển thị ảnh MRI của study đã chọn và điểm mô hình đã lưu nếu có. "
+        "Điểm số không phải chẩn đoán hoặc nguy cơ lâm sàng đã hiệu chuẩn. Ảnh thu nhỏ MRI được chỉnh cửa sổ để hiển thị "
+        "và không phải dữ liệu đã qua tiền xử lý đầu vào của mô hình."
     )
-
 
 if __name__ == "__main__":
     main()

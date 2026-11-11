@@ -1,6 +1,6 @@
 # RSNA Knee Abnormality Detection
 
-Weakly supervised MRI study classification for 12 knee abnormalities from the RSNA Knee MRI dataset. The repository contains research notebooks, model-specific preprocessing and inference code, and a Streamlit viewer for a prepared one-study demo.
+Weakly supervised MRI study classification for 12 knee abnormalities from the RSNA Knee MRI dataset. The repository contains research notebooks, model-specific preprocessing and inference code, and a Streamlit viewer for exported DICOM studies and saved predictions.
 
 > **Scope:** This is a research/software demonstration, not a clinical diagnostic tool. Its scores are not clinically calibrated probabilities. The bundled demo sample is from `gold_validation` and does not represent independent validation.
 
@@ -20,7 +20,7 @@ python -m pip install -r requirements-ui.txt
 streamlit run app.py
 ```
 
-The dashboard defaults to `demo/output/ensemble` and looks for the sample under `C:\rsna_demo\demo_sample`, then `demo/input/demo_sample`. Set `RSNA_DEMO_SAMPLE` to use a different sample directory. You can also edit the paths in the dashboard sidebar.
+The dashboard defaults to `demo/output/ensemble` for saved predictions and scans the directory selected by `RSNA_DEMO_SAMPLE` (if set), otherwise `demo/input/demo_sample`, `demo/input`, or the legacy `C:\rsna_demo\demo_sample` folder. Select a study from the **Chọn study** dropdown in the sidebar. The package folder path is under **Thư viện study**; prediction and optional report paths are under **Cài đặt nâng cao**.
 
 The dashboard requires these four Phase 3 files in its selected output directory:
 
@@ -33,7 +33,7 @@ ensemble_report.json
 
 The sample directory must contain `manifest.json`, `series_metadata.csv`, `series_selection.csv`, and `dicom/`. A `radiology_report.txt` can be added to show the source report; Notebook 15 exports it from Kaggle `train.csv`. The app checks that the sample and prediction artifacts refer to the same study before showing MRI images.
 
-To browse multiple studies, add one complete exported package per study under a common directory, for example `demo/input/studies/<study-folder>/manifest.json` plus that package's metadata, selection CSV, and `dicom/` tree. Point the dashboard's sample path at the common `studies` directory; it will offer a study selector. For scores, place each study's four Phase 3 files under `demo/output/ensemble/<StudyInstanceUID>/`. The dashboard matches the selected study to its output report. If there is no matching output yet, it still shows that study's metadata and MRI galleries.
+To browse multiple studies, place one complete exported package per study beneath a common directory, for example `demo/input/demo_sample/study_001/manifest.json` plus that package's `series_metadata.csv`, `series_selection.csv`, and `dicom/` tree. The dashboard scans `demo/input/demo_sample` and lists its study folders. Choose a study by its folder name and displayed Study UID; after copying in more packages, click **Làm mới danh sách study**. For scores, place each study's four Phase 3 files under `demo/output/ensemble/<StudyInstanceUID>/`. The dashboard matches the selected study to its output report. If there is no matching output yet, it still shows that study's metadata and MRI galleries.
 
 ## Reproduce a local prediction
 
